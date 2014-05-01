@@ -5,8 +5,6 @@ package org.jocean.image;
 
 import java.io.InputStream;
 
-import org.jocean.idiom.Triple;
-import org.jocean.idiom.block.IntsBlob;
 import org.jocean.idiom.pool.BytesPool;
 import org.jocean.idiom.pool.IntsPool;
 import org.slf4j.Logger;
@@ -38,17 +36,6 @@ public class ImageUtils {
     public static RawImage decodeStreamAsRawImage(final Context ctx, final InputStream is) 
             throws Exception {
         final JPEGDecoder decoder = new JPEGDecoder(ctx.bytesPool, new ImageBitsInputStream(is));
-        final Triple<Integer, Integer, IntsBlob> raw = decoder.decode(ctx.intsPool);
-        if ( null != raw ) {
-            try {
-                final RawImage img = new RawImage(raw.getFirst(), raw.getSecond(), raw.getThird());
-                return img;
-            }
-            finally {
-                raw.getThird().release();
-            }
-        }
-        
-        return null;
+        return decoder.decode(ctx.intsPool);
     }
 }
