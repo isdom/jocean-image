@@ -14,7 +14,7 @@ import org.jocean.idiom.block.RandomAccessInts;
 public class RawImage extends AbstractReferenceCounted<RawImage> 
     implements Propertyable {
     
-    public interface PixelArrayDrawer {
+    public interface PixelArrayDrawer<T> {
         /**
         Treat the specified array of colors as a bitmap, and draw it. This gives the same result as first creating a bitmap from the array, and then drawing it, but this method avoids explicitly creating a bitmap object which can be more efficient if the colors are changing often.
 
@@ -28,10 +28,10 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         height  The height of the bitmap
         hasAlpha    True if the alpha channel of the colors contains valid values. If false, the alpha byte is ignored (assumed to be 0xFF for every pixel).
         */
-        public void drawPixelArray(Object ctx, int[] colors, int offset, int stride, float x, float y, int width, int height, boolean hasAlpha);
+        public void drawPixelArray(T ctx, int[] colors, int offset, int stride, float x, float y, int width, int height, boolean hasAlpha);
     }
     
-    public interface PixelDrawer {
+    public interface PixelDrawer<T> {
         /**
         Treat the specified array of colors as a bitmap, and draw it. This gives the same result as first creating a bitmap from the array, and then drawing it, but this method avoids explicitly creating a bitmap object which can be more efficient if the colors are changing often.
 
@@ -45,7 +45,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         height  The height of the bitmap
         hasAlpha    True if the alpha channel of the colors contains valid values. If false, the alpha byte is ignored (assumed to be 0xFF for every pixel).
         */
-        public void drawPixel(Object ctx, int x, int y, int color);
+        public void drawPixel(T ctx, int x, int y, int color);
     }
     
     public RawImage(final int w, final int h, final IntsBlob ints) {
@@ -130,7 +130,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         return scaled;
     }
 
-    public void drawScale(final PixelDrawer drawer, final Object ctx, final int left, int top, int right, int bottom) {
+    public <T> void drawScale(final PixelDrawer<T> drawer, final T ctx, final int left, int top, int right, int bottom) {
         
         boolean interpolate = true; // 插值模式   
         final int dstWidth = right - left;
@@ -227,7 +227,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     /**
      * @param canvas
      */
-    public void drawDirect(final PixelArrayDrawer drawer, final Object ctx, final int left, int top) {
+    public <T> void drawDirect(final PixelArrayDrawer<T> drawer, final T ctx, final int left, int top) {
         int currentx = 0;
         int currenty = 0;
         
