@@ -28,7 +28,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         height  The height of the bitmap
         hasAlpha    True if the alpha channel of the colors contains valid values. If false, the alpha byte is ignored (assumed to be 0xFF for every pixel).
         */
-        public void drawPixelArray(int[] colors, int offset, int stride, float x, float y, int width, int height, boolean hasAlpha);
+        public void drawPixelArray(Object ctx, int[] colors, int offset, int stride, float x, float y, int width, int height, boolean hasAlpha);
     }
     
     public interface PixelDrawer {
@@ -45,7 +45,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         height  The height of the bitmap
         hasAlpha    True if the alpha channel of the colors contains valid values. If false, the alpha byte is ignored (assumed to be 0xFF for every pixel).
         */
-        public void drawPixel(int x, int y, int color);
+        public void drawPixel(Object ctx, int x, int y, int color);
     }
     
     public RawImage(final int w, final int h, final IntsBlob ints) {
@@ -130,7 +130,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         return scaled;
     }
 
-    public void drawScale(final PixelDrawer drawer, final int left, int top, int right, int bottom) {
+    public void drawScale(final PixelDrawer drawer, final Object ctx, final int left, int top, int right, int bottom) {
         
         boolean interpolate = true; // 插值模式   
         final int dstWidth = right - left;
@@ -168,7 +168,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
                     if (xs >= xlimit)   
                         xs = xlimit2; 
                     
-                    drawer.drawPixel(x + left, y + top, 
+                    drawer.drawPixel(ctx, x + left, y + top, 
                             getInterpolatedPixel(xs, ys, width, this._ints));
                 }   
             }   
@@ -227,7 +227,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     /**
      * @param canvas
      */
-    public void drawDirect(final PixelArrayDrawer drawer, final int left, int top) {
+    public void drawDirect(final PixelArrayDrawer drawer, final Object ctx, final int left, int top) {
         int currentx = 0;
         int currenty = 0;
         
@@ -249,7 +249,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
                 // draw top
                 w = Math.min(this._width - currentx, restLength);
                 h = 1;
-                drawer.drawPixelArray(colors, currentoffset, this._width, left + currentx, top + currenty, w, h, false);
+                drawer.drawPixelArray(ctx, colors, currentoffset, this._width, left + currentx, top + currenty, w, h, false);
                 currentoffset += w;
                 restLength -= w;
                 currentx += w;
@@ -263,7 +263,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
                 // draw body
                 w = Math.min(this._width, restLength);
                 h = restLength / w;
-                drawer.drawPixelArray(colors, currentoffset, this._width, left + currentx, top + currenty, w, h, false);
+                drawer.drawPixelArray(ctx, colors, currentoffset, this._width, left + currentx, top + currenty, w, h, false);
                 currentoffset += w * h;
                 restLength -= w * h;
                 if ( h > 1 ) {
@@ -284,7 +284,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
                 // draw bottom
                 w = restLength;
                 h = 1;
-                drawer.drawPixelArray(colors, currentoffset, this._width, left + currentx, top + currenty, w, h, false);
+                drawer.drawPixelArray(ctx, colors, currentoffset, this._width, left + currentx, top + currenty, w, h, false);
                 currentx += w;
                 if ( currentx == this._width ) {
                     // 递进到下一row
