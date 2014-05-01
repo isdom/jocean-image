@@ -31,13 +31,28 @@ public class ImageUtils {
 
     public static final class Context {
         
-        public Context(final BytesPool bytesPool, final IntsPool intsPool ) {
+        public Context(final BytesPool bytesPool, final IntsPool intsPool, final String mimeType ) {
             this.bytesPool = bytesPool;
             this.intsPool = intsPool;
+            this.mimeType = mimeType;
         }
         
         final BytesPool bytesPool;
         final IntsPool intsPool;
+        final String mimeType;
+    }
+    
+    public static RawImage decodeStreamAsRawImage(final Context ctx, final InputStream is) 
+        throws Exception {
+        if ( ctx.mimeType.equals("image/jpeg")) {
+            return decodeJPEGStreamAsRawImage(ctx, is);
+        }
+        else if ( ctx.mimeType.equals("image/png")) {
+            return decodePNGStreamAsRawImage(ctx, is);
+        }
+        else {
+            return null;
+        }
     }
     
     public static RawImage decodeJPEGStreamAsRawImage(final Context ctx, final InputStream is) 
