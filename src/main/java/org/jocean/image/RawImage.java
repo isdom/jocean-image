@@ -255,7 +255,8 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
                 // draw top
                 w = Math.min(this._width - currentx, restLength);
                 h = 1;
-                drawer.drawPixelArray(ctx, colors, currentoffset, this._width, left + currentx, top + currenty, w, h, false);
+                drawer.drawPixelArray(ctx, colors, currentoffset, this._width, 
+                        left + currentx, top + currenty, w, h, this._hasAlpha);
                 currentoffset += w;
                 restLength -= w;
                 currentx += w;
@@ -269,7 +270,8 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
                 // draw body
                 w = Math.min(this._width, restLength);
                 h = restLength / w;
-                drawer.drawPixelArray(ctx, colors, currentoffset, this._width, left + currentx, top + currenty, w, h, false);
+                drawer.drawPixelArray(ctx, colors, currentoffset, this._width, 
+                        left + currentx, top + currenty, w, h, this._hasAlpha);
                 currentoffset += w * h;
                 restLength -= w * h;
                 if ( h > 1 ) {
@@ -290,7 +292,8 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
                 // draw bottom
                 w = restLength;
                 h = 1;
-                drawer.drawPixelArray(ctx, colors, currentoffset, this._width, left + currentx, top + currenty, w, h, false);
+                drawer.drawPixelArray(ctx, colors, currentoffset, this._width, 
+                        left + currentx, top + currenty, w, h, this._hasAlpha);
                 currentx += w;
                 if ( currentx == this._width ) {
                     // 递进到下一row
