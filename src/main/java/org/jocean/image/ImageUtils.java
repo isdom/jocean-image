@@ -78,12 +78,13 @@ public class ImageUtils {
                 final int R = scanline[j * channels] & 0xff;
                 final int G = scanline[j * channels+1] & 0xff;
                 final int B = scanline[j * channels+2] & 0xff;
-                output.write( 0xff000000 | (R << 16) | (G << 8) | B );
+                final int A = pngr.imgInfo.alpha ? (scanline[j * channels+3] & 0xff) : 0xff;
+                output.write( (A << 24) | (R << 16) | (G << 8) | B );
             }
         }
         final IntsBlob ints = output.drainToIntsBlob();
         try {
-            return new RawImage(pngr.imgInfo.cols, pngr.imgInfo.rows, ints);
+            return new RawImage(pngr.imgInfo.cols, pngr.imgInfo.rows, ints, pngr.imgInfo.alpha);
         }
         finally {
             ints.release();

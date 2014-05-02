@@ -48,10 +48,11 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         public void drawPixel(T ctx, int x, int y, int color);
     }
     
-    public RawImage(final int w, final int h, final IntsBlob ints) {
+    public RawImage(final int w, final int h, final IntsBlob ints, final boolean hasAlpha) {
         this._width = w;
         this._height = h;
         this._ints = ints.retain();
+        this._hasAlpha = hasAlpha;
     }
     
     @Override
@@ -93,7 +94,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         final int dstHeight = h;
         final int roiWidth = this._width;   
         final int roiHeight = this._height;
-        final int width = roiWidth;   
+        final int width = roiWidth;
         double srcCenterX = roiWidth / 2.0;   
         double srcCenterY = roiHeight / 2.0;   
         double dstCenterX = dstWidth / 2.0;   
@@ -124,7 +125,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
             }   
         }
         
-        final RawImage scaled = new RawImage(w, h, ints);
+        final RawImage scaled = new RawImage(w, h, ints, this._hasAlpha);
         ints.release();
         scaled._properties.putAll(this.getProperties());
         return scaled;
@@ -187,29 +188,35 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
    
         int lowerLeft = ints.getAt(xy2index((int) x, (int) y, w));   
         // lowerLeft = lowerLeft << 8 >>> 8;   
+        int all = (lowerLeft & 0xff000000) >> 24;
         int rll = (lowerLeft & 0xff0000) >> 16;   
         int gll = (lowerLeft & 0xff00) >> 8;   
-        int bll = lowerLeft & 0xff;   
+        int bll = lowerLeft & 0xff;
    
         int lowerRight = ints.getAt(xy2index((int) x + 1, (int) y, w));
         // lowerRight = lowerRight << 8 >>> 8;   
+        int alr = (lowerRight & 0xff000000) >> 24;
         int rlr = (lowerRight & 0xff0000) >> 16;   
         int glr = (lowerRight & 0xff00) >> 8;   
         int blr = lowerRight & 0xff;   
    
         int upperRight = ints.getAt(xy2index((int) x + 1, (int) y + 1, w));   
         // upperRight = upperRight << 8 >>> 8;   
+        int aur = (upperRight & 0xff000000) >> 24;
         int rur = (upperRight & 0xff0000) >> 16;   
         int gur = (upperRight & 0xff00) >> 8;   
         int bur = upperRight & 0xff;   
    
         int upperLeft = ints.getAt(xy2index((int) x, (int) y + 1, w));
         // upperLeft = upperLeft << 8 >>> 8;   
+        int aul = (upperLeft & 0xff000000) >> 24;
         int rul = (upperLeft & 0xff0000) >> 16;   
         int gul = (upperLeft & 0xff00) >> 8;   
         int bul = upperLeft & 0xff;   
    
-        int r, g, b;   
+        int a, r, g, b;   
+        a = (all + alr + aur + aul) / 4;
+        
         double upperAverage, lowerAverage;   
         upperAverage = rul + xFraction * (rur - rul);   
         lowerAverage = rll + xFraction * (rlr - rll);   
@@ -220,8 +227,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         upperAverage = bul + xFraction * (bur - bul);   
         lowerAverage = bll + xFraction * (blr - bll);   
         b = (int) (lowerAverage + yFraction * (upperAverage - lowerAverage) + 0.5);   
-   
-        return 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | b & 0xff;   
+        return ((a & 0xff) << 24) | ((r & 0xff) << 16) | ((g & 0xff) << 8) | b & 0xff;   
     }   
     
     /**
@@ -303,5 +309,6 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     private final int _width;
     private final int _height;
     private final IntsBlob _ints;
+    private final boolean _hasAlpha;
     private final Map<String, Object> _properties = new HashMap<String, Object>();
 }
