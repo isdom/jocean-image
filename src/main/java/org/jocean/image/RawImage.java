@@ -10,9 +10,14 @@ import org.jocean.idiom.Propertyable;
 import org.jocean.idiom.block.BlockUtils;
 import org.jocean.idiom.block.IntsBlob;
 import org.jocean.idiom.block.RandomAccessInts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RawImage extends AbstractReferenceCounted<RawImage> 
     implements Propertyable<RawImage> {
+    
+    private static final Logger LOG = 
+            LoggerFactory.getLogger(RawImage.class);
     
     public interface PixelArrayDrawer<T> {
         /**
@@ -307,7 +312,14 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     
     @Override
     protected void deallocate() {
-        this._ints.release();
+        if (  this._ints.release() ) {
+            if ( LOG.isTraceEnabled() ) {
+                LOG.trace("RawImage {} release rawinfo.", this._properties);
+            }
+        }
+        else {
+            LOG.warn("RawImage {} !NOT! release it's rawinfo.", this._properties);
+        }
     }
     
     private final int _width;
