@@ -4,6 +4,7 @@ package org.jocean.image;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jocean.idiom.AbstractReferenceCounted;
 import org.jocean.idiom.Propertyable;
@@ -15,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 public class RawImage extends AbstractReferenceCounted<RawImage> 
     implements Propertyable<RawImage> {
+    
+    private static final AtomicInteger _TOTAL_SIZE = new AtomicInteger(0);
     
     private static final Logger LOG = 
             LoggerFactory.getLogger(RawImage.class);
@@ -59,10 +62,13 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         this._ints = ints.retain();
         this._hasAlpha = hasAlpha;
         
+        final int totalSize = _TOTAL_SIZE.addAndGet( w * h * 4);
+        
         if ( LOG.isTraceEnabled() ) {
-            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created.", this, 
+            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size if ({})Kbytes.", this, 
                     this._properties, 
-                    this._width * this._height * 4.0f / 1024);
+                    this._width * this._height * 4.0f / 1024,
+                    totalSize / 1024.0f);
         }
     }
     
@@ -73,10 +79,13 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         this._hasAlpha = hasAlpha;
         this._properties.putAll(props);
         
+        final int totalSize = _TOTAL_SIZE.addAndGet( w * h * 4);
+        
         if ( LOG.isTraceEnabled() ) {
-            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created.", this, 
+            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size if ({})Kbytes.", this, 
                     this._properties, 
-                    this._width * this._height * 4.0f / 1024);
+                    this._width * this._height * 4.0f / 1024,
+                    totalSize / 1024.0f);
         }
     }
     
@@ -332,16 +341,23 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     @Override
     protected void deallocate() {
         if (  this._ints.release() ) {
+            final int totalSize = _TOTAL_SIZE.addAndGet( -this._width * this._height * 4 );
             if ( LOG.isTraceEnabled() ) {
-                LOG.trace("RawImage({}):prop({}) and Kbytes({}) release rawdata succeed .", this, 
+                LOG.trace("RawImage({}):prop({}) and Kbytes({}) release rawdata succeed, total RawImages size if ({})Kbytes.", 
+                        this, 
                         this._properties, 
-                        this._width * this._height * 4.0f / 1024);
+                        this._width * this._height * 4.0f / 1024,
+                        totalSize / 1024.0f
+                        );
             }
         }
         else {
-            LOG.warn("RawImage({}):prop({}) and Kbytes({}) !NOT! release it's rawdata.", this, 
+            final int totalSize = _TOTAL_SIZE.get();
+            LOG.warn("RawImage({}):prop({}) and Kbytes({}) !NOT! release it's rawdata, total RawImages size if ({})Kbytes.", this, 
                     this._properties,
-                    this._width * this._height * 4.0f / 1024);
+                    this._width * this._height * 4.0f / 1024,
+                    totalSize / 1024.0f
+                    );
         }
     }
     
