@@ -58,6 +58,26 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         this._height = h;
         this._ints = ints.retain();
         this._hasAlpha = hasAlpha;
+        
+        if ( LOG.isTraceEnabled() ) {
+            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created.", this, 
+                    this._properties, 
+                    this._width * this._height * 4.0f / 1024);
+        }
+    }
+    
+    public RawImage(final int w, final int h, final IntsBlob ints, final boolean hasAlpha, final Map<String, Object> props) {
+        this._width = w;
+        this._height = h;
+        this._ints = ints.retain();
+        this._hasAlpha = hasAlpha;
+        this._properties.putAll(props);
+        
+        if ( LOG.isTraceEnabled() ) {
+            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created.", this, 
+                    this._properties, 
+                    this._width * this._height * 4.0f / 1024);
+        }
     }
     
     @Override
@@ -131,9 +151,8 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
             }   
         }
         
-        final RawImage scaled = new RawImage(w, h, ints, this._hasAlpha);
+        final RawImage scaled = new RawImage(w, h, ints, this._hasAlpha, this._properties);
         ints.release();
-        scaled._properties.putAll(this.getProperties());
         return scaled;
     }
 
@@ -314,12 +333,14 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     protected void deallocate() {
         if (  this._ints.release() ) {
             if ( LOG.isTraceEnabled() ) {
-                LOG.trace("RawImage:prop({}) and Kbytes({}) release rawinfo succeed .", this._properties, 
+                LOG.trace("RawImage({}):prop({}) and Kbytes({}) release rawdata succeed .", this, 
+                        this._properties, 
                         this._width * this._height * 4.0f / 1024);
             }
         }
         else {
-            LOG.warn("RawImage:prop({}) and Kbytes({}) !NOT! release it's rawinfo.", this._properties,
+            LOG.warn("RawImage({}):prop({}) and Kbytes({}) !NOT! release it's rawdata.", this, 
+                    this._properties,
                     this._width * this._height * 4.0f / 1024);
         }
     }
