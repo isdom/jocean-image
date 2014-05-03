@@ -31,6 +31,18 @@ public class ImageUtils {
 
     public static final class Context {
         
+        public Context(final BytesPool bytesPool, final IntsPool intsPool) {
+            this.bytesPool = bytesPool;
+            this.intsPool = intsPool;
+            this.mimeType = null;
+        }
+        
+        public Context(final Context ctx, final String mimeType) {
+            this.bytesPool = ctx.bytesPool;
+            this.intsPool = ctx.intsPool;
+            this.mimeType = mimeType;
+        }
+        
         public Context(final BytesPool bytesPool, final IntsPool intsPool, final String mimeType ) {
             this.bytesPool = bytesPool;
             this.intsPool = intsPool;
