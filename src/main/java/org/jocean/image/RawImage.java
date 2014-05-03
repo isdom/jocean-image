@@ -12,7 +12,7 @@ import org.jocean.idiom.block.IntsBlob;
 import org.jocean.idiom.block.RandomAccessInts;
 
 public class RawImage extends AbstractReferenceCounted<RawImage> 
-    implements Propertyable {
+    implements Propertyable<RawImage> {
     
     public interface PixelArrayDrawer<T> {
         /**
@@ -61,8 +61,9 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     }
 
     @Override
-    public <T> void setProperty(final String key, T obj) {
+    public <T> RawImage setProperty(final String key, T obj) {
         this._properties.put(key, obj);
+        return this;
     }
 
     @Override
@@ -71,7 +72,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     }
     
     public int getSizeInByte() {
-        return this._ints.length();
+        return this._ints.length() * 4;
     }
     
     public int getWidth() {
