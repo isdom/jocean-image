@@ -314,11 +314,13 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     protected void deallocate() {
         if (  this._ints.release() ) {
             if ( LOG.isTraceEnabled() ) {
-                LOG.trace("RawImage {} release rawinfo.", this._properties);
+                LOG.trace("RawImage:prop({}) and Kbytes({}) release rawinfo succeed .", this._properties, 
+                        this._width * this._height * 4.0f / 1024);
             }
         }
         else {
-            LOG.warn("RawImage {} !NOT! release it's rawinfo.", this._properties);
+            LOG.warn("RawImage:prop({}) and Kbytes({}) !NOT! release it's rawinfo.", this._properties,
+                    this._width * this._height * 4.0f / 1024);
         }
     }
     
