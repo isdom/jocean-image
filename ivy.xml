@@ -56,5 +56,6 @@
         <dependency org="ar.com.hjg" name="pngj" rev="2.0.1" 
             conf="compile->default(*)"/>
         
-   	</dependencies>
+        <dependency org="com.alibaba" name="fastjson" rev="1.1.39" transitive="false"/>
+    </dependencies>
 </ivy-module>

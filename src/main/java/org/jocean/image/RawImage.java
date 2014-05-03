@@ -1,6 +1,12 @@
 package org.jocean.image;
 
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,11 +17,22 @@ import org.jocean.idiom.Propertyable;
 import org.jocean.idiom.block.BlockUtils;
 import org.jocean.idiom.block.IntsBlob;
 import org.jocean.idiom.block.RandomAccessInts;
+import org.jocean.idiom.pool.IntsPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.annotation.JSONCreator;
+import com.alibaba.fastjson.annotation.JSONField;
+
 public class RawImage extends AbstractReferenceCounted<RawImage> 
     implements Propertyable<RawImage> {
+    
+    private static IntsPool _DEFAULT_INTSPOOL;
+    
+    public static void initDefaultPool(final IntsPool pool) {
+        _DEFAULT_INTSPOOL = pool;
+    }
     
     private static final AtomicInteger _TOTAL_SIZE = new AtomicInteger(0);
     
@@ -89,6 +106,53 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         }
     }
     
+    @JSONCreator
+    private RawImage(
+            @JSONField(name="width")
+            final int w, 
+            @JSONField(name="height")
+            final int h, 
+            @JSONField(name="alpha")
+            final boolean hasAlpha,
+            @JSONField(name="properties")
+            final Map<String, Object> props
+            ) {
+        this._width = w;
+        this._height = h;
+        this._ints = BlockUtils.createIntsBlob(w * h, _DEFAULT_INTSPOOL);
+        this._hasAlpha = hasAlpha;
+        this._properties.putAll(props);
+        
+        final int totalSize = _TOTAL_SIZE.addAndGet( w * h * 4);
+        
+        if ( LOG.isTraceEnabled() ) {
+            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size:({})Kbytes.", this, 
+                    this._properties, 
+                    this._width * this._height * 4.0f / 1024,
+                    totalSize / 1024.0f);
+        }
+    }
+    
+    public void encodeTo(final OutputStream os) throws Exception {
+        final DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(os));
+
+        dos.writeUTF(JSON.toJSONString(this));
+        for ( int idx = 0; idx < this._ints.length(); idx++ ) {
+            dos.writeInt(this._ints.getAt(idx));
+        }
+        dos.flush();
+    }
+    
+    public static RawImage decodeFrom(final InputStream is) throws Exception {
+        final DataInputStream dis = new DataInputStream(new BufferedInputStream(is));
+
+        final RawImage img = JSON.parseObject( dis.readUTF(), RawImage.class);
+        for ( int idx = 0; idx < img._ints.length(); idx++ ) {
+            img._ints.writeAt(idx, dis.readInt());
+        }
+        return img;
+    }
+    
     @Override
     public <T> T getProperty(final String key) {
         return (T)this._properties.get(key);
@@ -100,23 +164,32 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         return this;
     }
 
+    @JSONField(name = "properties")
     @Override
     public Map<String, Object> getProperties() {
         return Collections.unmodifiableMap(this._properties);
     }
     
+    @JSONField(serialize = false)
     public int getSizeInByte() {
         return this._ints.length() * 4;
     }
     
+    @JSONField(name = "width")
     public int getWidth() {
         return this._width;
     }
 
+    @JSONField(name = "height")
     public int getHeight() {
         return this._height;
     }
     
+    @JSONField(name = "alpha")
+    public boolean isHasAlpha() {
+        return this._hasAlpha;
+    }
+
     public RawImage createScaleImage(final float scaleRatio) {
         return createScaleImage( (int)(this._width * scaleRatio), (int)(this._height * scaleRatio));
     }
