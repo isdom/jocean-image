@@ -65,7 +65,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         final int totalSize = _TOTAL_SIZE.addAndGet( w * h * 4);
         
         if ( LOG.isTraceEnabled() ) {
-            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size if ({})Kbytes.", this, 
+            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size:({})Kbytes.", this, 
                     this._properties, 
                     this._width * this._height * 4.0f / 1024,
                     totalSize / 1024.0f);
@@ -82,7 +82,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         final int totalSize = _TOTAL_SIZE.addAndGet( w * h * 4);
         
         if ( LOG.isTraceEnabled() ) {
-            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size if ({})Kbytes.", this, 
+            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size:({})Kbytes.", this, 
                     this._properties, 
                     this._width * this._height * 4.0f / 1024,
                     totalSize / 1024.0f);
@@ -343,7 +343,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         if (  this._ints.release() ) {
             final int totalSize = _TOTAL_SIZE.addAndGet( -this._width * this._height * 4 );
             if ( LOG.isTraceEnabled() ) {
-                LOG.trace("RawImage({}):prop({}) and Kbytes({}) release rawdata succeed, total RawImages size if ({})Kbytes.", 
+                LOG.trace("RawImage({}):prop({}) and Kbytes({}) release rawdata succeed, total RawImages size:({})Kbytes.", 
                         this, 
                         this._properties, 
                         this._width * this._height * 4.0f / 1024,
@@ -353,7 +353,8 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         }
         else {
             final int totalSize = _TOTAL_SIZE.get();
-            LOG.warn("RawImage({}):prop({}) and Kbytes({}) !NOT! release it's rawdata, total RawImages size if ({})Kbytes.", this, 
+            LOG.warn("RawImage({}):prop({}) and Kbytes({}) !NOT! release it's rawdata, total RawImages size:({})Kbytes.", 
+                    this, 
                     this._properties,
                     this._width * this._height * 4.0f / 1024,
                     totalSize / 1024.0f
