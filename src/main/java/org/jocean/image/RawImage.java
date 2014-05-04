@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jocean.idiom.AbstractReferenceCounted;
+import org.jocean.idiom.ExceptionUtils;
 import org.jocean.idiom.Propertyable;
 import org.jocean.idiom.block.BlockUtils;
 import org.jocean.idiom.block.IntsBlob;
@@ -29,11 +30,20 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     implements Propertyable<RawImage> {
     
     private static IntsPool _DEFAULT_INTSPOOL;
+    private static boolean _TRACE_LIFECYCLE = true;
     
     public static void initDefaultPool(final IntsPool pool) {
         _DEFAULT_INTSPOOL = pool;
     }
     
+    public static void enableLifecycleTrace(final boolean enabled) {
+        _TRACE_LIFECYCLE = enabled;
+    }
+    
+    private static Throwable callStackNow() {
+        return _TRACE_LIFECYCLE ? new Throwable() : null;
+    }
+
     private static final AtomicInteger _TOTAL_SIZE = new AtomicInteger(0);
     
     private static final Logger LOG = 
@@ -73,11 +83,13 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         public void drawPixel(T ctx, int x, int y, int color);
     }
     
+    
     public RawImage(final int w, final int h, final IntsBlob ints, final boolean hasAlpha) {
         this._width = w;
         this._height = h;
         this._ints = ints.retain();
         this._hasAlpha = hasAlpha;
+        this._callStackCreated = callStackNow();
         
         final int totalSize = _TOTAL_SIZE.addAndGet( w * h * 4);
         
@@ -95,11 +107,13 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         this._ints = ints.retain();
         this._hasAlpha = hasAlpha;
         this._properties.putAll(props);
+        this._callStackCreated = callStackNow();
         
         final int totalSize = _TOTAL_SIZE.addAndGet( w * h * 4);
         
         if ( LOG.isTraceEnabled() ) {
-            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size:({})Kbytes.", this, 
+            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size:({})Kbytes.", 
+                    this, 
                     this._properties, 
                     this._width * this._height * 4.0f / 1024,
                     totalSize / 1024.0f);
@@ -122,11 +136,13 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         this._ints = BlockUtils.createIntsBlob(w * h, _DEFAULT_INTSPOOL);
         this._hasAlpha = hasAlpha;
         this._properties.putAll(props);
+        this._callStackCreated = callStackNow();
         
         final int totalSize = _TOTAL_SIZE.addAndGet( w * h * 4);
         
         if ( LOG.isTraceEnabled() ) {
-            LOG.trace("RawImage({}):prop({}) and Kbytes({}) created, total RawImages size:({})Kbytes.", this, 
+            LOG.trace("RawImage decode from JSONString, ({}):prop({}) and Kbytes({}) created, total RawImages size:({})Kbytes.", 
+                    this, 
                     this._properties, 
                     this._width * this._height * 4.0f / 1024,
                     totalSize / 1024.0f);
@@ -435,9 +451,22 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
         }
     }
     
+    
+    @Override
+    public String toString() {
+        return "RawImage [" + Integer.toHexString(hashCode()) 
+                + ", w=" + _width + ", h=" + _height 
+                + ", alpha=" + _hasAlpha
+                + ", props=" + _properties 
+                + ( null != this._callStackCreated ? ExceptionUtils.dumpCallStack( this._callStackCreated, "\r\nCreated At:", 1) : "")
+                + "]";
+    }
+
     private final int _width;
     private final int _height;
     private final IntsBlob _ints;
     private final boolean _hasAlpha;
     private final Map<String, Object> _properties = new HashMap<String, Object>();
+    
+    private final Throwable _callStackCreated;
 }
