@@ -30,7 +30,7 @@ public class RawImage extends AbstractReferenceCounted<RawImage>
     implements Propertyable<RawImage> {
     
     private static IntsPool _DEFAULT_INTSPOOL;
-    private static boolean _TRACE_LIFECYCLE = true;
+    private static boolean _TRACE_LIFECYCLE = false;
     
     public static void initDefaultPool(final IntsPool pool) {
         _DEFAULT_INTSPOOL = pool;
