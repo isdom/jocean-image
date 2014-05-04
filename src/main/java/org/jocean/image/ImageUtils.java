@@ -4,6 +4,7 @@
 package org.jocean.image;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import org.jocean.idiom.block.BlockUtils;
 import org.jocean.idiom.block.IntsBlob;
@@ -35,23 +36,34 @@ public class ImageUtils {
             this.bytesPool = bytesPool;
             this.intsPool = intsPool;
             this.mimeType = null;
+            this.properties = null;
         }
         
         public Context(final Context ctx, final String mimeType) {
             this.bytesPool = ctx.bytesPool;
             this.intsPool = ctx.intsPool;
+            this.properties = ctx.properties;
             this.mimeType = mimeType;
+        }
+        
+        public Context(final Context ctx, final String mimeType, final Map<String, Object> properties) {
+            this.bytesPool = ctx.bytesPool;
+            this.intsPool = ctx.intsPool;
+            this.mimeType = mimeType;
+            this.properties = properties;
         }
         
         public Context(final BytesPool bytesPool, final IntsPool intsPool, final String mimeType ) {
             this.bytesPool = bytesPool;
             this.intsPool = intsPool;
             this.mimeType = mimeType;
+            this.properties = null;
         }
         
         final BytesPool bytesPool;
         final IntsPool intsPool;
         final String mimeType;
+        final Map<String, Object> properties;
     }
     
     public static RawImage decodeStreamAsRawImage(final Context ctx, final InputStream is) 
@@ -70,7 +82,7 @@ public class ImageUtils {
     public static RawImage decodeJPEGStreamAsRawImage(final Context ctx, final InputStream is) 
             throws Exception {
         final JPEGDecoder decoder = new JPEGDecoder(ctx.bytesPool, new ImageBitsInputStream(is));
-        return decoder.decode(ctx.intsPool);
+        return decoder.decode(ctx.intsPool, ctx.properties);
     }
     
     public static RawImage decodePNGStreamAsRawImage(final Context ctx, final InputStream is) 
@@ -96,7 +108,7 @@ public class ImageUtils {
         }
         final IntsBlob ints = output.drainToIntsBlob();
         try {
-            return new RawImage(pngr.imgInfo.cols, pngr.imgInfo.rows, ints, pngr.imgInfo.alpha);
+            return new RawImage(pngr.imgInfo.cols, pngr.imgInfo.rows, ints, pngr.imgInfo.alpha, ctx.properties);
         }
         finally {
             ints.release();
