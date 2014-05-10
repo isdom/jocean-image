@@ -3,17 +3,17 @@ package org.jocean.image;
 import java.io.FileInputStream;
 
 import org.jocean.idiom.block.BlockUtils;
-import org.jocean.idiom.pool.PoolUtils;
+import org.jocean.idiom.pool.Pools;
 
 import com.alibaba.fastjson.JSON;
 
 public class RawImageTest {
 
     public static void main(String[] args) throws Exception {
-        RawImage.initDefaultPool(PoolUtils.createCachedIntsPool(1024));
+        RawImage.initDefaultPool(Pools.createCachedIntsPool(1024));
         
         final RawImage img = new RawImage(10, 10, 
-                BlockUtils.createIntsBlob(100, PoolUtils.createCachedIntsPool(100)), false)
+                BlockUtils.createIntsBlob(100, Pools.createCachedIntsPool(100)), false)
                 .setProperty("ID", "1001").setProperty("link", "http://www.cnblogs.com/cczhoufeng/archive/2013/04/03/2997836.html");
         
         final String json = JSON.toJSONString(img);
