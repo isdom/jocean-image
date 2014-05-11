@@ -47,15 +47,15 @@
 		<dependency org="org.slf4j" name="slf4j-api" rev="1.7.6" 
             conf="compile->default(*)" />
 		
-        <dependency org="org.jocean" name="jocean-idiom" rev="0.0.8-SNAPSHOT" 
-            conf="compile->default(*)" changing="true"/>
+        <dependency org="org.jocean" name="jocean-idiom" rev="0.0.8" 
+            conf="compile->default(*)"/>
 					
-        <dependency org="org.jocean" name="simpleimage-lite" rev="0.0.1-SNAPSHOT" 
+<!--         <dependency org="org.jocean" name="simpleimage-lite" rev="0.0.1-SNAPSHOT" 
             conf="compile->default(*)" changing="true" transitive="false"/>
         
         <dependency org="ar.com.hjg" name="pngj" rev="2.0.1" 
             conf="compile->default(*)"/>
-        
+ -->        
         <dependency org="com.alibaba" name="fastjson" rev="1.1.39" transitive="false"/>
     </dependencies>
 </ivy-module>
